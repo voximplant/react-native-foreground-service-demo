@@ -1,4 +1,4 @@
-#React Native Foreground Service Demo
+# React Native Foreground Service Demo
 
 This a demo project for [react-native-foreground-service](https://github.com/voximplant/react-native-foreground-service) module.
 `react-native-foregroun-service` library allows to stat and stop foreground service on Android platform.
@@ -9,5 +9,5 @@ This a demo project for [react-native-foreground-service](https://github.com/vox
 2. Run `npm install` command in the Terminal
 3. Run `react-native run-android` in the Terminal
 
-##Licence 
+## Licence 
 MIT
