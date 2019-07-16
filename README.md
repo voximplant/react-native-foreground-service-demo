@@ -6,7 +6,7 @@ This a demo project for [react-native-foreground-service](https://github.com/vox
 
 ## Build and run application (Android only)
 1. Clone the project
-2. Run `npm install` command in the Terminal
+2. Run `yarn install` command in the Terminal
 3. Run `react-native run-android` in the Terminal
 
 ## Licence 
