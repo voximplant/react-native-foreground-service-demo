@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011-2022, Zingaya, Inc. All rights reserved.
  *
  * @format
  * @flow
@@ -11,30 +11,11 @@ import {Platform, StyleSheet, View, Button} from 'react-native';
 import VIForegroundService from "@voximplant/react-native-foreground-service";
 
 class App extends Component {
-    state = {
-        foregroundService: null,
-        isRunningService: false,
-        channelConfig: {
-            id: 'ForegroundServiceChannel',
-            name: 'Notification Channel',
-            description: 'Notification Channel for Foreground Service',
-            enableVibration: false,
-            importance: 2
-        },
-        notificationConfig: {
-            channelId: 'ForegroundServiceChannel',
-            id: 3456,
-            title: 'Foreground Service',
-            text: 'Foreground service is running',
-            icon: 'ic_notification',
-            priority: 0,
-            button: 'Stop service'
-        },
-    };
+    foregroundService = VIForegroundService.getInstance();
 
-    componentDidMount() {
-        this.setState({foregroundService: VIForegroundService.getInstance()});
-    }
+    state = {
+        isRunningService: false,
+    };
 
     async startService() {
         if (Platform.OS !== 'android') {
@@ -43,24 +24,40 @@ class App extends Component {
         }
         if (this.state.isRunningService) return;
         if (Platform.Version >= 26) {
-            await this.state.foregroundService.createNotificationChannel(this.state.channelConfig);
+            const channelConfig = {
+                id: 'ForegroundServiceChannel',
+                name: 'Notification Channel',
+                description: 'Notification Channel for Foreground Service',
+                enableVibration: false,
+                importance: 2
+            };
+            await this.foregroundService.createNotificationChannel(channelConfig);
         }
-        await this.state.foregroundService.startService(this.state.notificationConfig);
+        const notificationConfig = {
+            channelId: 'ForegroundServiceChannel',
+            id: 3456,
+            title: 'Foreground Service',
+            text: 'Foreground service is running',
+            icon: 'ic_notification',
+            priority: 0,
+            button: 'Stop service'
+        };
+        await this.foregroundService.startService(notificationConfig);
         this.setState({isRunningService: true});
         this.subscribeForegroundButtonPressedEvent();
     }
 
     async stopService() {
         if (!this.state.isRunningService) return;
-        await this.state.foregroundService.stopService();
+        await this.foregroundService.stopService();
         this.setState({isRunningService: false});
     }
 
     subscribeForegroundButtonPressedEvent() {
-        this.state.foregroundService.on('VIForegroundServiceButtonPressed', async () => {
-            await this.state.foregroundService.stopService();
+        this.foregroundService.on('VIForegroundServiceButtonPressed', async () => {
+            await this.foregroundService.stopService();
             this.setState({isRunningService: false});
-        })
+        });
     }
 
 
