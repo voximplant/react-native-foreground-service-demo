@@ -53,8 +53,8 @@ class App extends Component {
 
     async stopService() {
         if (!this.state.isRunningService) return;
-        await this.foregroundService.stopService();
         this.setState({isRunningService: false});
+        await this.foregroundService.stopService();
         this.foregroundService.off();
     }
 
