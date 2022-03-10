@@ -7,42 +7,60 @@
  */
 
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View, Button} from 'react-native';
+import {Platform, StyleSheet, View, Button} from 'react-native';
 import VIForegroundService from "@voximplant/react-native-foreground-service";
 
-type Props = {};
-export default class App extends Component<Props> {
+class App extends Component {
+    state = {
+        foregroundService: null,
+        isRunningService: false,
+        channelConfig: {
+            id: 'ForegroundServiceChannel',
+            name: 'Notification Channel',
+            description: 'Notification Channel for Foreground Service',
+            enableVibration: false,
+            importance: 2
+        },
+        notificationConfig: {
+            channelId: 'ForegroundServiceChannel',
+            id: 3456,
+            title: 'Foreground Service',
+            text: 'Foreground service is running',
+            icon: 'ic_notification',
+            priority: 0,
+            button: 'Stop service'
+        },
+    };
+
+    componentDidMount() {
+        this.setState({foregroundService: VIForegroundService.getInstance()});
+    }
 
     async startService() {
         if (Platform.OS !== 'android') {
             console.log('Only Android platform is supported');
             return;
         }
+        if (this.state.isRunningService) return;
         if (Platform.Version >= 26) {
-            const channelConfig = {
-                id: 'ForegroundServiceChannel',
-                name: 'Notification Channel',
-                description: 'Notification Channel for Foreground Service',
-                enableVibration: false,
-                importance: 2
-            };
-            await VIForegroundService.createNotificationChannel(channelConfig);
+            await this.state.foregroundService.createNotificationChannel(this.state.channelConfig);
         }
-        const notificationConfig = {
-            id: 3456,
-            title: 'Foreground Service',
-            text: 'Foreground service is running',
-            icon: 'ic_notification',
-            priority: 0
-        };
-        if (Platform.Version >= 26) {
-            notificationConfig.channelId = 'ForegroundServiceChannel';
-        }
-        await VIForegroundService.startService(notificationConfig);
+        await this.state.foregroundService.startService(this.state.notificationConfig);
+        this.setState({isRunningService: true});
+        this.subscribeForegroundButtonPressedEvent();
     }
 
     async stopService() {
-        await VIForegroundService.stopService();
+        if (!this.state.isRunningService) return;
+        await this.state.foregroundService.stopService();
+        this.setState({isRunningService: false});
+    }
+
+    subscribeForegroundButtonPressedEvent() {
+        this.state.foregroundService.on('VIForegroundServiceButtonPressed', async () => {
+            await this.state.foregroundService.stopService();
+            this.setState({isRunningService: false});
+        })
     }
 
 
@@ -56,6 +74,8 @@ export default class App extends Component<Props> {
         );
     }
 }
+
+export default App;
 
 const styles = StyleSheet.create({
     container: {
