@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011-2022, Zingaya, Inc. All rights reserved.
  *
  * @format
  * @flow
@@ -7,17 +7,22 @@
  */
 
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View, Button} from 'react-native';
+import {Platform, StyleSheet, View, Button} from 'react-native';
 import VIForegroundService from "@voximplant/react-native-foreground-service";
 
-type Props = {};
-export default class App extends Component<Props> {
+class App extends Component {
+    foregroundService = VIForegroundService.getInstance();
+
+    state = {
+        isRunningService: false,
+    };
 
     async startService() {
         if (Platform.OS !== 'android') {
             console.log('Only Android platform is supported');
             return;
         }
+        if (this.state.isRunningService) return;
         if (Platform.Version >= 26) {
             const channelConfig = {
                 id: 'ForegroundServiceChannel',
@@ -26,23 +31,37 @@ export default class App extends Component<Props> {
                 enableVibration: false,
                 importance: 2
             };
-            await VIForegroundService.createNotificationChannel(channelConfig);
+            await this.foregroundService.createNotificationChannel(channelConfig);
         }
         const notificationConfig = {
+            channelId: 'ForegroundServiceChannel',
             id: 3456,
             title: 'Foreground Service',
             text: 'Foreground service is running',
             icon: 'ic_notification',
-            priority: 0
+            priority: 0,
+            button: 'Stop service'
         };
-        if (Platform.Version >= 26) {
-            notificationConfig.channelId = 'ForegroundServiceChannel';
+        try {
+            this.subscribeForegroundButtonPressedEvent();
+            await this.foregroundService.startService(notificationConfig);
+            this.setState({isRunningService: true});
+        } catch (_) {
+            this.foregroundService.off();
         }
-        await VIForegroundService.startService(notificationConfig);
     }
 
     async stopService() {
-        await VIForegroundService.stopService();
+        if (!this.state.isRunningService) return;
+        this.setState({isRunningService: false});
+        await this.foregroundService.stopService();
+        this.foregroundService.off();
+    }
+
+    subscribeForegroundButtonPressedEvent() {
+        this.foregroundService.on('VIForegroundServiceButtonPressed', async () => {
+            await this.stopService();
+        });
     }
 
 
@@ -56,6 +75,8 @@ export default class App extends Component<Props> {
         );
     }
 }
+
+export default App;
 
 const styles = StyleSheet.create({
     container: {
