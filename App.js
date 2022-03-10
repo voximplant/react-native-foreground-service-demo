@@ -42,21 +42,25 @@ class App extends Component {
             priority: 0,
             button: 'Stop service'
         };
-        await this.foregroundService.startService(notificationConfig);
-        this.setState({isRunningService: true});
-        this.subscribeForegroundButtonPressedEvent();
+        try {
+            this.subscribeForegroundButtonPressedEvent();
+            await this.foregroundService.startService(notificationConfig);
+            this.setState({isRunningService: true});
+        } catch (_) {
+            this.foregroundService.off();
+        }
     }
 
     async stopService() {
         if (!this.state.isRunningService) return;
         await this.foregroundService.stopService();
         this.setState({isRunningService: false});
+        this.foregroundService.off();
     }
 
     subscribeForegroundButtonPressedEvent() {
         this.foregroundService.on('VIForegroundServiceButtonPressed', async () => {
-            await this.foregroundService.stopService();
-            this.setState({isRunningService: false});
+            await this.stopService();
         });
     }
 
