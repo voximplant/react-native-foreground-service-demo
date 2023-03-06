@@ -3,14 +3,34 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
     "start": "react-native start",
     "test": "jest",
+    "lint_TS": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "build": "cd android && ./gradlew bundleRelease",
+    "clean": "cd android && ./gradlew clean",
+    "apk": "cd android && ./gradlew assembleRelease",
+    "device": "react-native run-android --deviceId 68efca1a",
+    "cc": "react-native start --reset-cache",
+    "log-ios": "npx react-native log-ios",
+    "log-android": "npx react-native log-android",
+    "loadAPK": "npx react-native run-android --variant=release",
+    "del": "cd android && rm -rf build && cd app && rm -rf build",
+    "delW": "cd android && rmdir build /s /q && cd src && rmdir build /s /q",
+    "new": "yarn clean && yarn del && yarn apk",
+    "clean-modules_rnp": "rm -rf ./node_modules/react-native-permissions/{example,node_modules}",
+    "clean_rnp": "rm -rf ./node_modules ./ios/Pods",
+    "preinstall_rnp": "cd .. && yarn prepack && cd example",
+    "postinstall_rnp": "yarn clean-modules_rnp && react-native setup-ios-permissions && pod-install",
+    "postinstall_rnp_2": "yarn clean-modules_rnp && react-native setup-ios-permissions",
+    "reinstall_rnp": "yarn clean_rnp && yarn install",
     "lint": "eslint ."
   },
   "dependencies": {
-    "react": "17.0.2",
-    "react-native": "0.67.0",
-    "@voximplant/react-native-foreground-service": "3.0.1"
+    "react": "18.2.0",
+    "react-native": "0.71.3",
+    "@voximplant/react-native-foreground-service": "3.0.2"
   },
   "devDependencies": {
     "@babel/core": "7.17.0",
